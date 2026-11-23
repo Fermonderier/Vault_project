@@ -1,0 +1,13 @@
+node_modules/
+target/
+.anchor/
+test-ledger/
+dist/
+coverage/
+.env
+.env.*
+*.log
+*.so
+*.keypair
+*-keypair.json
+id.json

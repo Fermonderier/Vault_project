@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Учебный Solana Liquidity Vault в сети Devnet"
+    />
+    <title>Liquidity Vault · Devnet</title>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Liquidity Vault">
+          <span class="brand-mark">V</span>
+          <span>Liquidity Vault</span>
+        </a>
+        <div class="network-pill"><span></span> Solana Devnet</div>
+        <div class="wallet-actions">
+          <span id="wallet-label" class="wallet-label"
+            >Кошелёк не подключён</span
+          >
+          <button id="connect-wallet" class="button button-primary">
+            Подключить Phantom
+          </button>
+          <button id="disconnect-wallet" class="button button-quiet" hidden>
+            Отключить
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="eyebrow">Учебный проект · недели 8–15</div>
+          <h1>Ваши активы.<br /><span>Работающая стратегия.</span></h1>
+          <p>
+            Внесите тестовые токены, получите shares и следите за vault в
+            Devnet. Действия администратора доступны только владельцу vault.
+          </p>
+          <a
+            class="text-link"
+            href="https://explorer.solana.com/?cluster=devnet"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Открыть Solana Explorer <span aria-hidden="true">↗</span>
+          </a>
+        </section>
+
+        <section class="connection-card card">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">01 · Vault</div>
+              <h2>Подключение к vault</h2>
+            </div>
+            <button id="refresh-vault" class="button button-secondary" disabled>
+              Обновить данные
+            </button>
+          </div>
+          <label class="field">
+            <span>Mint базового токена</span>
+            <input
+              id="base-mint"
+              spellcheck="false"
+              placeholder="Адрес mint в Devnet"
+            />
+          </label>
+          <div id="address-list" class="address-list" aria-live="polite">
+            <div class="empty-state">
+              Подключите кошелёк и укажите mint токена.
+            </div>
+          </div>
+          <div class="inline-actions setup-actions">
+            <button
+              id="initialize-vault"
+              class="button button-primary"
+              disabled
+            >
+              Создать vault
+            </button>
+            <button
+              id="open-position"
+              class="button button-secondary"
+              disabled
+              hidden
+            >
+              Создать профиль
+            </button>
+          </div>
+          <div class="stats-grid">
+            <article class="stat">
+              <span>Активы vault</span>
+              <strong id="vault-balance">—</strong>
+              <small id="vault-balance-symbol">base token</small>
+            </article>
+            <article class="stat">
+              <span>Выпущено shares</span>
+              <strong id="share-supply">—</strong>
+              <small>общий объём</small>
+            </article>
+            <article class="stat">
+              <span>Ваш баланс</span>
+              <strong id="user-balances">—</strong>
+              <small id="user-balance-symbol">base / shares</small>
+            </article>
+            <article class="stat">
+              <span>Статус стратегии</span>
+              <strong id="strategy-status">—</strong>
+              <small id="strategy-pool">pool не настроен</small>
+            </article>
+          </div>
+        </section>
+
+        <section class="user-grid">
+          <article class="card action-card">
+            <div class="eyebrow">02 · Внести</div>
+            <h2>Депозит</h2>
+            <p>Shares выпускаются пропорционально доле в активах vault.</p>
+            <label class="field">
+              <span>Сумма базового токена</span>
+              <input
+                id="deposit-amount"
+                inputmode="decimal"
+                placeholder="0.00"
+              />
+            </label>
+            <button
+              id="deposit"
+              class="button button-primary button-wide"
+              disabled
+            >
+              Внести токены
+            </button>
+          </article>
+          <article class="card action-card">
+            <div class="eyebrow">03 · Забрать</div>
+            <h2>Вывод</h2>
+            <p>Shares сжигаются, а ваша доля возвращается в базовом токене.</p>
+            <label class="field">
+              <span>Количество shares</span>
+              <input
+                id="withdraw-amount"
+                inputmode="decimal"
+                placeholder="0.00"
+              />
+            </label>
+            <button
+              id="withdraw"
+              class="button button-secondary button-wide"
+              disabled
+            >
+              Вывести средства
+            </button>
+          </article>
+        </section>
+
+        <section class="card admin-card" id="admin-panel" hidden>
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">04 · Admin</div>
+              <h2>Управление стратегией</h2>
+              <p>Доступно только администратору, записанному в vault.</p>
+            </div>
+            <span class="admin-badge">Admin access</span>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-setup">
+              <h3>Настроить и запустить</h3>
+              <label class="field">
+                <span>Mint второго (quote) токена</span>
+                <input
+                  id="quote-mint"
+                  spellcheck="false"
+                  placeholder="Адрес quote mint"
+                />
+              </label>
+              <label class="field">
+                <span>Raydium CLMM pool</span>
+                <input
+                  id="pool-state"
+                  spellcheck="false"
+                  placeholder="Адрес pool state"
+                />
+              </label>
+              <button
+                id="configure-strategy"
+                class="button button-secondary button-wide"
+                disabled
+              >
+                Настроить пул
+              </button>
+              <label class="field">
+                <span>Пополнение strategy PDA (lamports, необязательно)</span>
+                <input id="funding-lamports" inputmode="numeric" value="0" />
+              </label>
+              <button
+                id="begin-strategy"
+                class="button button-primary button-wide"
+                disabled
+              >
+                Начать стратегию
+              </button>
+              <button
+                id="end-strategy"
+                class="button button-quiet button-wide"
+                disabled
+              >
+                Завершить и разблокировать vault
+              </button>
+            </div>
+
+            <div class="advanced-panel">
+              <h3>Raydium-инструкции</h3>
+              <p>
+                Для CPI укажите account map из IDL и данные пула. Общие PDA и
+                программы можно подставить автоматически.
+              </p>
+              <label class="field">
+                <span>Инструкция</span>
+                <select id="strategy-instruction">
+                  <option value="swap">Swap</option>
+                  <option value="openClmmPosition">Открыть позицию</option>
+                  <option value="decreaseLiquidity">
+                    Уменьшить ликвидность
+                  </option>
+                  <option value="collectPositionFees">Собрать комиссии</option>
+                  <option value="closeClmmPosition">Закрыть позицию</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Аргументы JSON</span>
+                <textarea
+                  id="instruction-args"
+                  rows="4"
+                  spellcheck="false"
+                ></textarea>
+              </label>
+              <label class="field">
+                <span>Аккаунты JSON (имена camelCase из IDL)</span>
+                <textarea
+                  id="instruction-accounts"
+                  rows="7"
+                  spellcheck="false"
+                ></textarea>
+              </label>
+              <label class="field">
+                <span>Дополнительные CPI accounts JSON</span>
+                <textarea id="remaining-accounts" rows="3" spellcheck="false">
+[]</textarea>
+              </label>
+              <div class="inline-actions">
+                <button
+                  id="fill-accounts"
+                  class="button button-secondary"
+                  disabled
+                >
+                  Подставить известные аккаунты
+                </button>
+                <button
+                  id="execute-instruction"
+                  class="button button-primary"
+                  disabled
+                >
+                  Выполнить инструкцию
+                </button>
+              </div>
+              <details class="help-details">
+                <summary>Какие данные нужны для CLMM CPI?</summary>
+                <p>
+                  Для swap потребуются AMM config, observation state, оба pool
+                  vault/mint и tick-array accounts. Для позиции также нужны tick
+                  indexes, protocol position и NFT metadata PDA. Значения
+                  берутся из Raydium pool и официального SDK. Передавайте
+                  `minOutput`/минимумы с учётом slippage.
+                </p>
+              </details>
+            </div>
+          </div>
+        </section>
+
+        <section class="card activity-card">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">Activity</div>
+              <h2>Последняя операция</h2>
+            </div>
+            <span id="activity-state" class="activity-state"
+              >Ожидание кошелька</span
+            >
+          </div>
+          <p id="activity-message" class="activity-message" aria-live="polite">
+            Подключите Phantom в режиме Devnet, чтобы начать.
+          </p>
+          <a
+            id="transaction-link"
+            class="text-link"
+            target="_blank"
+            rel="noreferrer"
+            hidden
+          >
+            Открыть транзакцию в Explorer <span aria-hidden="true">↗</span>
+          </a>
+        </section>
+      </main>
+
+      <footer>
+        <span>Учебная версия · только тестовые активы</span>
+        <span>Никогда не вводите seed-фразу на сайте.</span>
+      </footer>
+    </div>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>
